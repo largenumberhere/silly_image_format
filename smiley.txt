@@ -1,0 +1,346 @@
+begin Image
+	begin Row
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+	end Row
+
+	begin Row
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+	end Row
+
+	begin Row
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+	end Row
+
+	begin Row
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+	end Row
+
+	begin Row
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+	end Row
+
+	begin Row
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+	end Row
+
+	begin Row
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+	end Row
+
+	begin Row
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 0;
+			set Blue = 0;
+			set Green = 0;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+		begin Pixel
+			set Red = 255;
+			set Blue = 255;
+			set Green = 255;
+		end Pixel
+	end Row
+
+end Image
