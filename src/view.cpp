@@ -9,10 +9,15 @@
 #include "common.hpp"
 #include <fstream>
 #include <regex>
+#include <format>
 
+// returns null on failure
 std::string* read_file_to_string(const char* file_path) {
    
     FILE* file = fopen(file_path, "r");
+    if (file == NULL) {
+        return nullptr;
+    }
 
     // get length
     fseek(file, 0, SEEK_END);
@@ -35,14 +40,31 @@ Texture2D genTexture2d(int width, int height) {
     return texture;
 }
 
+
+static float WINDOW_RELATIVE_SIZE = 1;
+static float CAMERA_ZOOM_RATIO = 1;
+
+float screen_ratio(int current_size, int default_size) {
+    return (float)current_size / (float)default_size;
+}
+
 int main(int argc, char* argv[]) {
+    const int MIN_WIDTH = 800;
+    const int MIN_HEIGHT = 600;
+
     std::vector<const char*> args = collectArgs(argc, argv);
 
     if (args.size() != 2) {
         exitWithUsage();
     }
+
     const char* infile_path = args.at(1);
     std::string* file_contents = read_file_to_string(infile_path);
+    if (file_contents == nullptr) {
+        std::cerr << "Failed to open the file '" << infile_path << "' ";
+        perror("");
+        exit(1);
+    }
 
     // fetch all integers
     auto regex = new std::regex ("\\d+", std::regex_constants::ECMAScript | std::regex_constants::icase);
@@ -68,6 +90,10 @@ int main(int argc, char* argv[]) {
             i = 0;
         }
     }
+
+    // free the regex
+    delete iter_begin;
+    delete regex;
     
     // swap the blue and green channels
     // red, blue green -> red green blue
@@ -91,23 +117,22 @@ int main(int argc, char* argv[]) {
     }
 
     // cleanup memory
-    delete file_contents;
-    delete iter_begin;
-    delete regex;
     delete rows_begin;
     delete regex_rows;
+    delete file_contents;
     
     // calculate width and height
     int width = (data.size()/4) / rows;
     int height = rows;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(std::max(width, 100), std::max(height, 100), "silly image format");
+    InitWindow(std::max(width, MIN_WIDTH), std::max(height, MIN_HEIGHT), "silly image format");
     
     // create a texture
     Texture2D texture = genTexture2d(width, height);
     UpdateTexture(texture, data.data());
 
+<<<<<<< HEAD
     BeginDrawing();
     {
     
@@ -125,6 +150,76 @@ int main(int argc, char* argv[]) {
     while (!WindowShouldClose())
     {
         PollInputEvents();
+=======
+    Camera2D camera = {0};
+    camera.offset = Vector2{0, 0};
+    camera.rotation = 0;
+    camera.target = Vector2{0,0};
+    camera.zoom = 1;
+
+    std::string zoom_string;
+    double prev_key_time = GetTime();
+    while (!WindowShouldClose())
+    {
+        
+
+        // update camera if window resized
+        if (IsWindowResized()) { 
+            int new_h = GetScreenHeight();
+            int new_w = GetScreenWidth();
+            
+            float ratio_h = screen_ratio(new_h, height); // (float)new_h / (float)HEIGHT;
+            float ratio_w = screen_ratio(new_w, width); // (float)new_w / (float)WIDTH;
+            
+            // smallest ratio means window is smallest along that dimension
+            
+            float newRelatveSize = 0;
+            if (ratio_w < ratio_h) {
+                newRelatveSize = ratio_w;
+            } else {
+                newRelatveSize = ratio_h;
+            }
+
+            WINDOW_RELATIVE_SIZE = newRelatveSize;
+            camera.zoom = WINDOW_RELATIVE_SIZE * CAMERA_ZOOM_RATIO;
+        }
+        
+        double time = GetTime();
+        if (prev_key_time + 0.1 < time) {
+            prev_key_time = time;
+            if (IsKeyDown('=')) {
+                std::cout << "+\n";
+                CAMERA_ZOOM_RATIO = CAMERA_ZOOM_RATIO * 1.1;
+                camera.zoom = WINDOW_RELATIVE_SIZE * CAMERA_ZOOM_RATIO;
+            } else if (IsKeyDown('-')) {
+                CAMERA_ZOOM_RATIO = CAMERA_ZOOM_RATIO * 0.9;
+                std::cout << "-\n";
+                camera.zoom = WINDOW_RELATIVE_SIZE * CAMERA_ZOOM_RATIO;
+            }
+        }
+
+        BeginDrawing();
+        {   
+            ClearBackground(GRAY);
+            BeginMode2D(camera);
+            {
+                DrawTexture(texture, 0, 0, WHITE);
+                
+            }
+            EndMode2D();
+
+            zoom_string.clear();
+            zoom_string.append(std::format("Zoom: {0}. ", CAMERA_ZOOM_RATIO));
+            const char* comment = "(Use +/- to zoom)";
+            int width =  std::max(MeasureText(zoom_string.c_str(), 10), MeasureText(comment, 10));
+            Color faint_gray = GRAY;
+            faint_gray.a = 50;
+            DrawRectangle(0, 0, width+10, 30, faint_gray);
+            DrawText(zoom_string.c_str(), 10, 10, 10, WHITE);
+            DrawText("(Use +/- to zoom)", 10, 20, 10, WHITE);
+        }
+        EndDrawing();
+>>>>>>> 26eb22f (- added error handling for output file opening)
     }
 
     CloseWindow();

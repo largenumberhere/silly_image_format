@@ -14,7 +14,7 @@ std::vector<const char*> collectArgs(int argc, char* argv[]) {
 
 void exitWithUsage() {
     std::cerr << "Please input a file name\n";
-    std::cerr << "Converter Usage: xmake run main infile.jpeg outfile.txt\n";
-    std::cerr << "Viewier Usage: xmake run main infile.txt\n";
+    std::cerr << "Converter Usage: xmake run convert infile.jpeg outfile.txt\n";
+    std::cerr << "Viewier Usage: xmake run view infile.txt\n";
     exit(1);
 }
