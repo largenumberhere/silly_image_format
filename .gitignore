@@ -1,0 +1,14 @@
+# IDEs
+/.vscode
+/.idea
+
+# Build artifacts
+/.xmake
+/build
+
+# msvc metadata files
+/*.pdb   
+
+# samply profiler output
+/profile.json.gz
+
