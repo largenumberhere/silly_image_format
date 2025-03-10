@@ -132,25 +132,6 @@ int main(int argc, char* argv[]) {
     Texture2D texture = genTexture2d(width, height);
     UpdateTexture(texture, data.data());
 
-<<<<<<< HEAD
-    BeginDrawing();
-    {
-    
-
-        ClearBackground(GRAY);
-        DrawTexture(texture, 0, 0, WHITE);
-
-        DrawFPS(10, 10);
-
-
-    }
-    EndDrawing();
-
-    std::cout << "meow\n";
-    while (!WindowShouldClose())
-    {
-        PollInputEvents();
-=======
     Camera2D camera = {0};
     camera.offset = Vector2{0, 0};
     camera.rotation = 0;
@@ -219,7 +200,6 @@ int main(int argc, char* argv[]) {
             DrawText("(Use +/- to zoom)", 10, 20, 10, WHITE);
         }
         EndDrawing();
->>>>>>> 26eb22f (- added error handling for output file opening)
     }
 
     CloseWindow();
