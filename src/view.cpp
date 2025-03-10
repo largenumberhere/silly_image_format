@@ -60,12 +60,13 @@ int main(int argc, char* argv[]) {
         auto c = (unsigned char) atoi(match_str.c_str());
         data.push_back(c);
         
-        if (i % 3 == 0) {
+        i++;
+        if (i == 3) {
             // add back in alpha
             char empty = 255;
             data.push_back(empty);
+            i = 0;
         }
-        i++;
     }
     
     // swap the blue and green channels
@@ -107,29 +108,23 @@ int main(int argc, char* argv[]) {
     Texture2D texture = genTexture2d(width, height);
     UpdateTexture(texture, data.data());
 
+    BeginDrawing();
+    {
+    
 
+        ClearBackground(GRAY);
+        DrawTexture(texture, 0, 0, WHITE);
+
+        DrawFPS(10, 10);
+
+
+    }
+    EndDrawing();
 
     std::cout << "meow\n";
-    bool first_iter = true;
     while (!WindowShouldClose())
     {
-        if (first_iter == true){
-            // draw
-            BeginDrawing();
-            {
-            
-
-                ClearBackground(GRAY);
-                DrawTexture(texture, 0, 0, WHITE);
-
-                DrawFPS(10, 10);
-
-    
-            }
-            EndDrawing();
-        }
-        
-        first_iter = false;
+        PollInputEvents();
     }
 
     CloseWindow();
