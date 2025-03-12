@@ -32,6 +32,7 @@ std::string* read_file_to_string(const char* file_path) {
     return file_string;
 }
 
+
 Texture2D genTexture2d(int width, int height) {
     auto image = GenImageColor(width, height, WHITE);
     auto texture = LoadTextureFromImage(image);
@@ -47,6 +48,7 @@ static float CAMERA_ZOOM_RATIO = 1;
 float screen_ratio(int current_size, int default_size) {
     return (float)current_size / (float)default_size;
 }
+
 
 int main(int argc, char* argv[]) {
     const int MIN_WIDTH = 800;
@@ -160,8 +162,6 @@ int main(int argc, char* argv[]) {
     bool first_run = true;
     while (!WindowShouldClose())
     {
-        
-
         // update camera if window resized
         if (IsWindowResized() || first_run) { 
             int new_h = GetScreenHeight();
@@ -220,10 +220,7 @@ int main(int argc, char* argv[]) {
     }
 
     UnloadTexture(texture);
-    data.~vector();
     CloseWindow();
     
-
-
     return 0;
 }
