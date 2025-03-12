@@ -10,6 +10,7 @@
 #include <fstream>
 #include <regex>
 #include <format>
+#include <fstream>
 
 // returns null on failure
 std::string* read_file_to_string(const char* file_path) {
@@ -50,18 +51,153 @@ float screen_ratio(int current_size, int default_size) {
 }
 
 struct ParsedFile {
-    std::vector<unsigned char> data;
+    std::vector<unsigned char> rgba_bytes;
     size_t rows_count;
 };
 
+
+class BufferedFile {
+    private: 
+        FILE* _fileHandle;
+        std::string _out_tmp;
+    
+        void trim(std::string *string){
+            // lhs
+            int count = 0;
+            for (int i = 0; i < string->size(); i++) {
+                char c = string->at(i);
+                if (c != '\n' && c != '\r' && c != '\t' && c !=' ') {
+                    break;
+                }
+
+                count ++;
+            }
+            string->erase(0, count);
+
+            // rhs
+            char end = string->at(string->size() -1);
+            if (end == '\n' || end == '\r' || end == 't' || end == ' ') {
+                std::cerr << "'" << *string << "'\n";
+                TODO();
+            }
+        }
+    public: 
+        BufferedFile(FILE* file) {
+            _fileHandle = file;
+        }
+
+        size_t lineNumber() {
+
+        }
+
+        std::string* readStrippedLine() {
+            _out_tmp.clear();
+            for (int i = 0; true; i++) {
+                int c = getc(_fileHandle);
+
+                if (c == EOF) {
+                    break;
+                }
+                
+                // break on newline - \n or \r\n
+                if (c == '\r') {
+                    c = getc(_fileHandle);
+                    if(c != '\n') {
+                        TODO();
+                    }
+                }
+
+                if (c == '\n') {
+                    break;
+                }
+
+                _out_tmp.push_back((char)c);
+            }
+
+            trim(&_out_tmp);
+            return &_out_tmp;
+        }
+};
+
+bool expectBeginImage(BufferedFile* cursor) {
+    std::string* line = cursor->readStrippedLine();
+    return (line->compare("begin Image") == 0);
+    
+}
+
+bool expectBeginRow(BufferedFile* cursor) {
+    std::string* line = cursor->readStrippedLine();
+    return (line->compare("begin Row") == 0);
+    
+}
+
+bool expectBeginPixel(BufferedFile* cursor) {
+    std::string* line = cursor->readStrippedLine();
+    std::cerr << "'" << *line << "'\n";
+    return (line->compare("begin Pixel") == 0);
+    
+}
+
+bool expectEndPixel(BufferedFile* cursor) {
+    std::string* line = cursor->readStrippedLine();
+    return (line->compare("end Pixel") == 0);
+    
+}
+
+bool expectEndRow (BufferedFile* cursor) {
+    std::string* line = cursor->readStrippedLine();
+    return (line->compare("end Row") == 0);
+}
+
+std::pair<bool, unsigned char> expectSetRed(BufferedFile* cursor) {
+    std::string* line = cursor->readStrippedLine();
+    // return (line->compare("begin Image") == 0);
+    TODO();
+}
+std::pair<bool, unsigned char> expectSetBlue(BufferedFile* cursor) {
+    std::string* line = cursor->readStrippedLine();
+    TODO();
+}
+
+std::pair<bool, unsigned char> expectSetGreen(BufferedFile* cursor) {
+    std::string* line = cursor->readStrippedLine();
+    TODO();
+}
+
+#define ASSERT_PARSE(expression) assertParseImpl((expression)==1, #expression)
+void assertParseImpl(bool condition, const char* expression) {
+    if (!condition) {
+        std::cerr << "ASSERT_PARSE failed for '" << expression << "'\n";
+        exit(1);
+    }
+}
+
+
 ParsedFile parseFile(const char* file_path) {
+    FILE* f = fopen(file_path, "r");
+    if (f == nullptr) {
+        TODO();
+    }
+
+    auto file = BufferedFile(f);
+
+    ASSERT_PARSE(expectBeginImage(&file));
+    ASSERT_PARSE(expectBeginRow(&file));
+    ASSERT_PARSE(expectBeginPixel(&file));
+
+
+
     ParsedFile parsed {};
+    
+    TODO();
     std::string* file_contents = read_file_to_string(file_path);
     if (file_contents == nullptr) {
         std::cerr << "Failed to open the file '" << file_path << "' ";
         perror("");
         exit(1);
     }
+
+    
 
     // fetch all integers from file
     auto regex = new std::regex ("\\d+", std::regex_constants::ECMAScript | std::regex_constants::icase);
@@ -110,21 +246,23 @@ ParsedFile parseFile(const char* file_path) {
         rows ++;
     }
 
-    parsed.data = data;
+    TODO();
+    parsed.rgba_bytes = data;
     parsed.rows_count = rows;
 
     //todo
     return parsed;
 }
 
+const int MIN_WINDOW_WIDTH = 800;
+const int MIN_WINDOW_HEIGHT = 600;
 
-int main(int argc, char* argv[]) {
-    const int MIN_WIDTH = 800;
-    const int MIN_HEIGHT = 600;
-
+int main(int argc, char* argv[]) {    
     // create a raylib context
+    SetTraceLogLevel(LOG_WARNING);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(MIN_WIDTH, MIN_HEIGHT, "silly image format");    
+    InitWindow(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT, "silly image format");    
+
     BeginDrawing();
     {
         DrawText("Loading image...", 10, 10, 20, RAYWHITE);
@@ -140,16 +278,17 @@ int main(int argc, char* argv[]) {
     ParsedFile parsed = parseFile(infile_path);
 
     // calculate width and height
-    int width = (parsed.data.size()/4) / parsed.rows_count;
+    int pixels_count = (parsed.rgba_bytes.size() / sizeof(Color));
+    int width = pixels_count / parsed.rows_count;
     int height = parsed.rows_count;
     
     // update window size
-    if ((width > MIN_WIDTH) || (height > MIN_HEIGHT)) {
-        SetWindowSize(std::max(width, MIN_WIDTH), std::max(height, MIN_HEIGHT));
+    if ((width > MIN_WINDOW_WIDTH) || (height > MIN_WINDOW_HEIGHT)) {
+        SetWindowSize(std::max(width, MIN_WINDOW_WIDTH), std::max(height, MIN_WINDOW_HEIGHT));
     }
 
     // create a texture
-    Color* image_colours = (Color*)parsed.data.data();
+    Color* image_colours = (Color*)parsed.rgba_bytes.data();
     Texture2D texture = genTexture2d(width, height);
     UpdateTexture(texture, image_colours);
 
@@ -158,13 +297,11 @@ int main(int argc, char* argv[]) {
     camera.offset = Vector2{0, 0};
     camera.rotation = 0;
     camera.target = Vector2{0,0};
-
     camera.zoom = WINDOW_RELATIVE_SIZE * CAMERA_ZOOM_RATIO;
 
-    Color faint_gray = GRAY;
-    faint_gray.a = 50;
+    Color faint_gray = { 130, 130, 130, 80};
 
-    std::string zoom_format_buffer;
+    auto zoom_format_buffer = std::string();
     double prev_key_time = GetTime();
     bool first_run = true;
     while (!WindowShouldClose())
@@ -231,13 +368,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
-/*
-    struct Row {
-        // ...
-    };
-    
-    std::Vector<Row> parseRows(filePath)
-
-
-*/

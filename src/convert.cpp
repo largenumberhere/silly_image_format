@@ -15,11 +15,6 @@
 
 #include "common.hpp"
 
-#define TODO() \
-    todoImpl(__LINE__, __FILE__)
-
-
-
 int main(int argc, char* argv[]) {
     std::vector<const char*> args = collectArgs(argc, argv);
 

@@ -18,3 +18,8 @@ void exitWithUsage() {
     std::cerr << "Viewier Usage: xmake run view infile.txt\n";
     exit(1);
 }
+
+void todoImpl(int line, const char* file) {
+    std::cerr << "TODO! " << file << ": " << line << "\n";
+    exit(1);
+}
