@@ -2,8 +2,8 @@
 #include <vector>
 #include <iostream>
 
-std::vector<const char*> collectArgs(int argc, char* argv[]) {
-    auto args = std::vector<const char*>();
+std::vector<char*> collectArgs(int argc, char* argv[]) {
+    auto args = std::vector<char*>();
     args.reserve(argc);
     for (int i = 0; i < argc; i++) {
         args.push_back(argv[i]);

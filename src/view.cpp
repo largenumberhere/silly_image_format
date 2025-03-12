@@ -11,6 +11,7 @@
 #include <regex>
 #include <format>
 #include <fstream>
+#include <stdint.h>
 
 // returns null on failure
 std::string* read_file_to_string(const char* file_path) {
@@ -60,8 +61,13 @@ class BufferedFile {
     private: 
         FILE* _fileHandle;
         std::string _out_tmp;
+        int _line_number = -1;
     
         void trim(std::string *string){
+            if (string->length() == 0) {
+                return;   
+            }
+
             // lhs
             int count = 0;
             for (int i = 0; i < string->size(); i++) {
@@ -115,6 +121,8 @@ class BufferedFile {
             }
 
             trim(&_out_tmp);
+
+            _line_number++;
             return &_out_tmp;
         }
 };
@@ -125,43 +133,127 @@ bool expectBeginImage(BufferedFile* cursor) {
     
 }
 
-bool expectBeginRow(BufferedFile* cursor) {
-    std::string* line = cursor->readStrippedLine();
-    return (line->compare("begin Row") == 0);
+// bool expectBeginRow(BufferedFile* cursor) {
+//     std::string* line = cursor->readStrippedLine();
+//     return (line->compare("begin Row") == 0);
     
-}
+// }
 
-bool expectBeginPixel(BufferedFile* cursor) {
-    std::string* line = cursor->readStrippedLine();
-    std::cerr << "'" << *line << "'\n";
-    return (line->compare("begin Pixel") == 0);
+// bool expectBeginPixel(BufferedFile* cursor) {
+//     std::string* line = cursor->readStrippedLine();
+//     std::cerr << "'" << *line << "'\n";
+//     return (line->compare("begin Pixel") == 0);   
+// }
+
+
+
+// bool expectEndPixel(BufferedFile* cursor) {
+//     std::string* line = cursor->readStrippedLine();
+//     return (line->compare("end Pixel") == 0);
     
-}
+// }
 
-bool expectEndPixel(BufferedFile* cursor) {
-    std::string* line = cursor->readStrippedLine();
-    return (line->compare("end Pixel") == 0);
+// bool expectEndRow (BufferedFile* cursor) {
+//     std::string* line = cursor->readStrippedLine();
+//     return (line->compare("end Row") == 0);
+// }
+
+#define STRNCMP_LEN(string1, literal) strncmp(string1, literal, strlen(literal))
+
+std::pair<unsigned char, int> parseByte(std::string* line, int number_start_offset) {
+    // get length of number
+    int number_len = 0;
+    for (auto line_iter = line->begin()+number_start_offset; line_iter != line->end(); line_iter++) {
+        if (isdigit(*line_iter) == 0) {
+            break;
+        }
+        number_len ++ ;
+    }
+
+    int number_end_offset = number_start_offset + number_len;
+
+    // parse the number
+    auto number_str = std::string();
+    for (int i = number_start_offset; i < number_end_offset; i++) {
+        number_str.push_back(line->at(i));
+    }
+
+    unsigned char number = atoi(number_str.c_str());
     
+    return std::pair(number, number_len);
+}
+std::pair<bool, unsigned char> expectSetRed(std::string* line) {
+    char* leading = "set Red = ";
+    if (STRNCMP_LEN(line->c_str(), leading) !=0) {
+        return std::pair(false, 0);
+    }
+    int number_start_offset = 0 + strlen(leading);
+
+    std::pair byte_result = parseByte(line, number_start_offset);
+
+    int number_end_offset = byte_result.second + number_start_offset;
+    unsigned char number = byte_result.first;
+
+    // check for a trailing semicolon
+    if (line->at(number_end_offset) != ';') {
+        return std::pair(false, 0);
+    }
+
+    // check entire string is consumed
+    if ((number_end_offset + 1) < (line->size())) {
+        return std::pair(false, 0);    
+    }
+
+    return std::pair(true, number);
+}
+std::pair<bool, unsigned char> expectSetBlue(std::string* line) {
+    char* leading = "set Blue = ";
+    if (STRNCMP_LEN(line->c_str(), leading) !=0) {
+        return std::pair(false, 0);
+    }
+    int number_start_offset = 0 + strlen(leading);
+
+    std::pair byte_result = parseByte(line, number_start_offset);
+
+    int number_end_offset = byte_result.second + number_start_offset;
+    unsigned char number = byte_result.first;
+
+    // check for a trailing semicolon
+    if (line->at(number_end_offset) != ';') {
+        return std::pair(false, 0);
+    }
+
+    // check entire string is consumed
+    if ((number_end_offset + 1) < (line->size())) {
+        return std::pair(false, 0);    
+    }
+
+    return std::pair(true, number);
 }
 
-bool expectEndRow (BufferedFile* cursor) {
-    std::string* line = cursor->readStrippedLine();
-    return (line->compare("end Row") == 0);
-}
+std::pair<bool, unsigned char> expectSetGreen(std::string* line) {
+    char* leading = "set Green = ";
+    if (STRNCMP_LEN(line->c_str(), leading) !=0) {
+        return std::pair(false, 0);
+    }
+    int number_start_offset = 0 + strlen(leading);
 
-std::pair<bool, unsigned char> expectSetRed(BufferedFile* cursor) {
-    std::string* line = cursor->readStrippedLine();
-    // return (line->compare("begin Image") == 0);
-    TODO();
-}
-std::pair<bool, unsigned char> expectSetBlue(BufferedFile* cursor) {
-    std::string* line = cursor->readStrippedLine();
-    TODO();
-}
+    std::pair byte_result = parseByte(line, number_start_offset);
 
-std::pair<bool, unsigned char> expectSetGreen(BufferedFile* cursor) {
-    std::string* line = cursor->readStrippedLine();
-    TODO();
+    int number_end_offset = byte_result.second + number_start_offset;
+    unsigned char number = byte_result.first;
+
+    // check for a trailing semicolon
+    if (line->at(number_end_offset) != ';') {
+        return std::pair(false, 0);
+    }
+
+    // check entire string is consumed
+    if ((number_end_offset + 1) < (line->size())) {
+        return std::pair(false, 0);    
+    }
+
+    return std::pair(true, number);
 }
 
 #define ASSERT_PARSE(expression) assertParseImpl((expression)==1, #expression)
@@ -173,85 +265,191 @@ void assertParseImpl(bool condition, const char* expression) {
 }
 
 
-ParsedFile parseFile(const char* file_path) {
+ParsedFile parseFile(char* file_path) {
     FILE* f = fopen(file_path, "r");
     if (f == nullptr) {
-        TODO();
+        std::cerr << "Failed to open file '" << file_path << "' for viewing\n";
+        exit(1);
     }
 
     auto file = BufferedFile(f);
 
-    ASSERT_PARSE(expectBeginImage(&file));
-    ASSERT_PARSE(expectBeginRow(&file));
-    ASSERT_PARSE(expectBeginPixel(&file));
-
-
-
-    ParsedFile parsed {};
-    
-    TODO();
-    std::string* file_contents = read_file_to_string(file_path);
-    if (file_contents == nullptr) {
-        std::cerr << "Failed to open the file '" << file_path << "' ";
-        perror("");
-        exit(1);
-    }
-
-    
-
-    // fetch all integers from file
-    auto regex = new std::regex ("\\d+", std::regex_constants::ECMAScript | std::regex_constants::icase);
-    auto iter_begin = new std::sregex_iterator(file_contents->begin(), file_contents->end(), *regex);
-    auto iter_end = std::sregex_iterator();
-    
-    // recover the image bytes from the red blue and green values
-    std::vector<unsigned char> data;
-    int i = 0;
-    for (auto iter = *iter_begin; iter != iter_end; iter ++) {
-        auto match = *iter;
-        auto match_str = match.str();
-
-        auto c = (unsigned char) atoi(match_str.c_str());
-        data.push_back(c);
-        
-        i++;
-        if (i == 3) {
-            // add back in alpha
-            char empty = 255;
-            data.push_back(empty);
-            i = 0;
-        }
-    }
-
-    // free the regex
-    delete iter_begin;
-    delete regex;
-    
-    // swap the blue and green channels due to the format having a different order
-    // red, blue green -> red green blue
-    for (int index = 0; index < data.size(); index+=4) {
-        Color* color = (Color*)&data.at(index);
-        Color tmp = *color;
-        color->g = tmp.b;
-        color->b = tmp.g;
-    }
-    
-    // count the rows
-    auto regex_rows = new std::regex("begin Row", std::regex_constants::ECMAScript | std::regex_constants::icase);
-    auto rows_begin = new std::sregex_iterator(file_contents->begin(), file_contents->end(), *regex_rows);
-    auto rows_end = std::sregex_iterator();
-
     int rows = 0;
-    for (auto iter = *rows_begin; iter != rows_end; iter ++) {
-        rows ++;
+    
+    std::string* line0 = file.readStrippedLine();
+    if (strcmp(line0->c_str(), "begin Image") != 0) {
+        std::cerr << line0 << "\n";
+        TODO();
+    } 
+
+    for (;;) {
+        // rows
+        if (strcmp(file.readStrippedLine()->c_str(), "begin Row") == 0) {
+            // pixels in row
+            for (;;) {
+                const char* line3 = file.readStrippedLine()->c_str();
+                if (strcmp(line3, "begin Pixel") == 0) {
+                    std::cerr << file.lineNumber() << "\n";
+                    std::string * red_line = file.readStrippedLine();
+                    if (STRNCMP_LEN(red_line->c_str(), "set Red =") == 0) {
+                        std::pair result = expectSetRed(red_line);
+                        if (!result.first) {
+                            TODO();
+                        }
+                    } else {
+                        TODO();
+                    }
+
+                    std::string* blue_line = file.readStrippedLine();
+                    if (STRNCMP_LEN(blue_line->c_str(), "set Blue =") == 0) {
+                        std::pair result = expectSetBlue(blue_line);
+                        if (!result.first) {
+                            TODO();
+                        }
+                    } else {
+                        TODO();
+                    }
+
+                    std::string* green_line = file.readStrippedLine();
+                    if (STRNCMP_LEN(green_line->c_str(), "set Green =") == 0) {
+                        std::pair result = expectSetGreen(green_line);
+                        if (!result.first) {
+                            TODO();
+                        }
+                    } else {
+                        TODO();
+                    }
+
+                    if (strcmp(file.readStrippedLine()->c_str(), "end Pixel")!=0) {
+                        TODO();
+                    }
+
+                } else if (STRNCMP_LEN(line3, "end Row") == 0) {
+                    std::cerr << file.lineNumber() << "\n";
+                    break;
+                } else {
+                    std::cerr << file.lineNumber() << "\n";
+                    TODO();
+                }
+            }
+
+            std::cerr << file.lineNumber() << "\n";
+        } else {
+            std::cerr << file.lineNumber() << "\n";
+            TODO();
+        }
+
     }
 
-    TODO();
-    parsed.rgba_bytes = data;
-    parsed.rows_count = rows;
+    std::string* line5 = file.readStrippedLine();
+    if (strcmp(line5->c_str(), "end Image") != 0) {
+        TODO();
+    }
 
-    //todo
-    return parsed;
+
+    TODO();
+    // for (;;) {        
+        
+    //     const char* header = file.readStrippedLine();
+    //     if (header == "begin Pixel") {
+    //         // ASSERT_PARSE(expectBeginPixel(&file));
+    //         auto pair = expectSetRed(&file);
+    //         unsigned char red = pair.second;
+    //         ASSERT_PARSE(pair.first == true);
+
+            
+    //         auto pair2 = expectSetBlue(&file);
+    //         unsigned char blue = pair2.second;
+    //         ASSERT_PARSE(pair2.first == true);
+
+    //         auto pair3 = expectSetGreen(&file);
+    //         unsigned char green = pair3.second;
+    //         ASSERT_PARSE(pair3.first == true);
+    //         // ASSERT_PARSE(expectEndPixel(&file));
+    //     } else if (header == "end Pixel")  {
+
+    //     } else if (header == "begin Row") {
+    //         rows ++;
+    //     } else if (header == "end Row") {
+
+    //     }
+    // }
+
+
+
+    /** 
+        ParsedFile parsed {};
+        
+        TODO();
+        std::string* file_contents = read_file_to_string(file_path);
+        if (file_contents == nullptr) {
+            std::cerr << "Failed to open the file '" << file_path << "' ";
+            perror("");
+            exit(1);
+        }
+
+        
+
+        // fetch all integers from file
+        auto regex = new std::regex ("\\d+", std::regex_constants::ECMAScript | std::regex_constants::icase);
+        auto iter_begin = new std::sregex_iterator(file_contents->begin(), file_contents->end(), *regex);
+        auto iter_end = std::sregex_iterator();
+        
+        // recover the image bytes from the red blue and green values
+        std::vector<unsigned char> data;
+        int i = 0;
+        for (auto iter = *iter_begin; iter != iter_end; iter ++) {
+            auto match = *iter;
+            auto match_str = match.str();
+
+            auto c = (unsigned char) atoi(match_str.c_str());
+            data.push_back(c);
+            
+            i++;
+            if (i == 3) {
+                // add back in alpha
+                char empty = 255;
+                data.push_back(empty);
+                i = 0;
+            }
+        }
+
+        // free the regex
+        delete iter_begin;
+        delete regex;
+        
+        // swap the blue and green channels due to the format having a different order
+        // red, blue green -> red green blue
+        for (int index = 0; index < data.size(); index+=4) {
+            Color* color = (Color*)&data.at(index);
+            Color tmp = *color;
+            color->g = tmp.b;
+            color->b = tmp.g;
+        }
+        
+        // count the rows
+        auto regex_rows = new std::regex("begin Row", std::regex_constants::ECMAScript | std::regex_constants::icase);
+        auto rows_begin = new std::sregex_iterator(file_contents->begin(), file_contents->end(), *regex_rows);
+        auto rows_end = std::sregex_iterator();
+
+        int rows = 0;
+        for (auto iter = *rows_begin; iter != rows_end; iter ++) {
+            rows ++;
+        }
+
+        TODO();
+        parsed.rgba_bytes = data;
+        parsed.rows_count = rows;
+
+        //todo
+        return parsed;
+    
+    **/
+
+    TODO();
+
+
+    return ParsedFile{};
 }
 
 const int MIN_WINDOW_WIDTH = 800;
@@ -269,11 +467,14 @@ int main(int argc, char* argv[]) {
     }
     EndDrawing();
 
-    std::vector<const char*> args = collectArgs(argc, argv);
+    std::vector<char*> args = collectArgs(argc, argv);
     if (args.size() != 2) {
+        if (args.size() > 2) {
+            std::cerr << "too many arguments\n";
+        }
         exitWithUsage();
     }
-    const char* infile_path = args.at(1);
+    char* infile_path = args.at(1);
 
     ParsedFile parsed = parseFile(infile_path);
 
