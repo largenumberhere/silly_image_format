@@ -49,29 +49,16 @@ float screen_ratio(int current_size, int default_size) {
     return (float)current_size / (float)default_size;
 }
 
+struct ParsedFile {
+    std::vector<unsigned char> data;
+    size_t rows_count;
+};
 
-int main(int argc, char* argv[]) {
-    const int MIN_WIDTH = 800;
-    const int MIN_HEIGHT = 600;
-
-    // create a raylib context
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(MIN_WIDTH, MIN_HEIGHT, "silly image format");    
-    BeginDrawing();
-    {
-        DrawText("Loading image...", 10, 10, 20, RAYWHITE);
-    }
-    EndDrawing();
-
-    std::vector<const char*> args = collectArgs(argc, argv);
-    if (args.size() != 2) {
-        exitWithUsage();
-    }
-
-    const char* infile_path = args.at(1);
-    std::string* file_contents = read_file_to_string(infile_path);
+ParsedFile parseFile(const char* file_path) {
+    ParsedFile parsed {};
+    std::string* file_contents = read_file_to_string(file_path);
     if (file_contents == nullptr) {
-        std::cerr << "Failed to open the file '" << infile_path << "' ";
+        std::cerr << "Failed to open the file '" << file_path << "' ";
         perror("");
         exit(1);
     }
@@ -123,30 +110,50 @@ int main(int argc, char* argv[]) {
         rows ++;
     }
 
-    // file conversion is complete
-    Color* image_colours = (Color*)data.data();
+    parsed.data = data;
+    parsed.rows_count = rows;
 
-    // cleanup memory
-    delete rows_begin;
-    delete regex_rows;
-    delete file_contents;
-    
+    //todo
+    return parsed;
+}
+
+
+int main(int argc, char* argv[]) {
+    const int MIN_WIDTH = 800;
+    const int MIN_HEIGHT = 600;
+
+    // create a raylib context
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+    InitWindow(MIN_WIDTH, MIN_HEIGHT, "silly image format");    
+    BeginDrawing();
+    {
+        DrawText("Loading image...", 10, 10, 20, RAYWHITE);
+    }
+    EndDrawing();
+
+    std::vector<const char*> args = collectArgs(argc, argv);
+    if (args.size() != 2) {
+        exitWithUsage();
+    }
+    const char* infile_path = args.at(1);
+
+    ParsedFile parsed = parseFile(infile_path);
+
     // calculate width and height
-    int width = (data.size()/4) / rows;
-    int height = rows;
-
+    int width = (parsed.data.size()/4) / parsed.rows_count;
+    int height = parsed.rows_count;
+    
     // update window size
     if ((width > MIN_WIDTH) || (height > MIN_HEIGHT)) {
         SetWindowSize(std::max(width, MIN_WIDTH), std::max(height, MIN_HEIGHT));
     }
 
     // create a texture
+    Color* image_colours = (Color*)parsed.data.data();
     Texture2D texture = genTexture2d(width, height);
     UpdateTexture(texture, image_colours);
 
     // create a camera
-
-
     Camera2D camera = {0};
     camera.offset = Vector2{0, 0};
     camera.rotation = 0;
@@ -221,6 +228,16 @@ int main(int argc, char* argv[]) {
 
     UnloadTexture(texture);
     CloseWindow();
-    
+
     return 0;
 }
+
+/*
+    struct Row {
+        // ...
+    };
+    
+    std::Vector<Row> parseRows(filePath)
+
+
+*/
