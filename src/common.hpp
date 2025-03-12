@@ -2,7 +2,7 @@
 
 #include <vector>
 
-std::vector<char*> collectArgs(int argc, char* argv[]);
+std::vector<const char*> collectArgs(int argc, const char* argv[]);
 
 void exitWithUsage();
 

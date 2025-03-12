@@ -12,7 +12,8 @@
 #include <format>
 #include <fstream>
 #include <stdint.h>
-
+// #include <stdio.h>
+#include <cstdio>
 // returns null on failure
 std::string* read_file_to_string(const char* file_path) {
    
@@ -93,7 +94,7 @@ class BufferedFile {
         }
 
         size_t lineNumber() {
-
+            return _line_number;
         }
 
         std::string* readStrippedLine() {
@@ -264,13 +265,77 @@ void assertParseImpl(bool condition, const char* expression) {
     }
 }
 
+typedef struct RBG {
+    unsigned char red;
+    unsigned char blue;
+    unsigned char green;
+};
 
-ParsedFile parseFile(char* file_path) {
-    FILE* f = fopen(file_path, "r");
+
+// TWO possible return stats:
+// - a valid RBG and a NULL stirng pointer
+// - a default RBG and a string with the line read
+std::pair<RBG, std::string*> parsePixel(BufferedFile* file) {
+    auto line3 = file->readStrippedLine();
+    if (strcmp(line3->c_str(), "begin Pixel")!=0) {
+        return std::pair(RBG{}, line3); 
+    }
+
+    std::cerr << file->lineNumber() << "\n";
+    std::string * red_line = file->readStrippedLine();
+    if (STRNCMP_LEN(red_line->c_str(), "set Red =") == 0) {
+        std::pair result = expectSetRed(red_line);
+        if (!result.first) {
+            TODO();
+        }
+    } else {
+        TODO();
+    }
+
+    std::string* blue_line = file->readStrippedLine();
+    if (STRNCMP_LEN(blue_line->c_str(), "set Blue =") == 0) {
+        std::pair result = expectSetBlue(blue_line);
+        if (!result.first) {
+            TODO();
+        }
+    } else {
+        TODO();
+    }
+
+    std::string* green_line = file->readStrippedLine();
+    if (STRNCMP_LEN(green_line->c_str(), "set Green =") == 0) {
+        std::pair result = expectSetGreen(green_line);
+        if (!result.first) {
+            TODO();
+        }
+    } else {
+        TODO();
+    }
+
+    if (strcmp(file->readStrippedLine()->c_str(), "end Pixel")!=0) {
+        TODO();
+    } else {
+        std::cerr << "end Pixel\n";
+        auto pair = std::pair(RBG{}, nullptr);
+        return pair;
+    }
+
+    // unreachable
+    TODO();
+    auto pair = std::pair(RBG{}, nullptr);
+    return pair;
+}
+
+ParsedFile parseFile(const char* file_path) {
+    std::cerr << file_path << "\n";
+    
+    // auto file_path2 = std::string(file_path);
+    FILE* f = std::fopen(file_path, "r");
     if (f == nullptr) {
         std::cerr << "Failed to open file '" << file_path << "' for viewing\n";
         exit(1);
     }
+    std::cerr << "opened file\n";
 
     auto file = BufferedFile(f);
 
@@ -284,58 +349,31 @@ ParsedFile parseFile(char* file_path) {
 
     for (;;) {
         // rows
-        if (strcmp(file.readStrippedLine()->c_str(), "begin Row") == 0) {
+        auto row = file.readStrippedLine();
+        std::string leftover;
+        if (strcmp(row->c_str(), "begin Row") == 0) {
             // pixels in row
             for (;;) {
-                const char* line3 = file.readStrippedLine()->c_str();
-                if (strcmp(line3, "begin Pixel") == 0) {
-                    std::cerr << file.lineNumber() << "\n";
-                    std::string * red_line = file.readStrippedLine();
-                    if (STRNCMP_LEN(red_line->c_str(), "set Red =") == 0) {
-                        std::pair result = expectSetRed(red_line);
-                        if (!result.first) {
-                            TODO();
-                        }
-                    } else {
-                        TODO();
-                    }
-
-                    std::string* blue_line = file.readStrippedLine();
-                    if (STRNCMP_LEN(blue_line->c_str(), "set Blue =") == 0) {
-                        std::pair result = expectSetBlue(blue_line);
-                        if (!result.first) {
-                            TODO();
-                        }
-                    } else {
-                        TODO();
-                    }
-
-                    std::string* green_line = file.readStrippedLine();
-                    if (STRNCMP_LEN(green_line->c_str(), "set Green =") == 0) {
-                        std::pair result = expectSetGreen(green_line);
-                        if (!result.first) {
-                            TODO();
-                        }
-                    } else {
-                        TODO();
-                    }
-
-                    if (strcmp(file.readStrippedLine()->c_str(), "end Pixel")!=0) {
-                        TODO();
-                    }
-
-                } else if (STRNCMP_LEN(line3, "end Row") == 0) {
-                    std::cerr << file.lineNumber() << "\n";
+                
+                // parse pixel
+                auto data = parsePixel(&file);
+                if (data.second != nullptr) {
+                    leftover = *data.second;
                     break;
-                } else {
-                    std::cerr << file.lineNumber() << "\n";
-                    TODO();
                 }
+                std::cerr << "Begin Pixel" << "\n";
+                // std::cerr << "" data.first << "\n";
+                std::cerr << "end Pixel\n";
+            }
+            
+            if (STRNCMP_LEN(leftover.c_str(), "end Row") == 0) {
+                continue;
+            } else {
+                TODO();
             }
 
-            std::cerr << file.lineNumber() << "\n";
+            
         } else {
-            std::cerr << file.lineNumber() << "\n";
             TODO();
         }
 
@@ -448,14 +486,14 @@ ParsedFile parseFile(char* file_path) {
 
     TODO();
 
-
+    // fclose(); xmake build view && xmake run view smiley.
     return ParsedFile{};
 }
 
 const int MIN_WINDOW_WIDTH = 800;
 const int MIN_WINDOW_HEIGHT = 600;
 
-int main(int argc, char* argv[]) {    
+int main(int argc, const char* argv[]) {    
     // create a raylib context
     SetTraceLogLevel(LOG_WARNING);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
@@ -467,14 +505,15 @@ int main(int argc, char* argv[]) {
     }
     EndDrawing();
 
-    std::vector<char*> args = collectArgs(argc, argv);
+    std::vector<const char*> args = collectArgs(argc, argv);
     if (args.size() != 2) {
         if (args.size() > 2) {
             std::cerr << "too many arguments\n";
         }
         exitWithUsage();
     }
-    char* infile_path = args.at(1);
+    const char* infile_path = args.at(1);
+    std::cerr << infile_path << "\n";
 
     ParsedFile parsed = parseFile(infile_path);
 
